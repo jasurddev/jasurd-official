@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================= CUSTOM UTILITIES (Pure CSS) ================= */
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Button Brutal Style */
+.btn-brutal {
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid #0f172a; /* slate-900 */
+}
+.btn-brutal:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px 0px rgba(15, 23, 42, 1) !important;
+}
+
+/* Card Hover Effect */
+.card-hoverable {
+  transition: all 0.2s ease;
+}
+.card-hoverable:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px 0px rgba(15, 23, 42, 1);
+}
+
+/* Background Pattern */
+.bg-pattern {
+  background-color: #f1f5f9;
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Chat Bubbles */
+.bubble-me {
+  border-bottom-right-radius: 0;
+}
+.bubble-them {
+  border-top-left-radius: 0;
+}
+
+/* Remove Details/Summary Marker */
+details > summary {
+  list-style: none;
+}
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Snap Scrolling Utilities */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+.snap-center {
+  scroll-snap-align: center;
+}
