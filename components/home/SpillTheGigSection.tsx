@@ -2,8 +2,10 @@
 
 import React from 'react';
 import SpillCard from '@/components/ui/SpillCard';
+import { useToast } from '@/components/ui/Toast'; // Optional: Kalau mau pake toast
 
 const SpillTheGigSection = () => {
+  // Mock Data
   const spills = [
     {
       id: 1,
@@ -43,7 +45,6 @@ const SpillTheGigSection = () => {
   };
 
   return (
-    // DIET: py-12 jadi py-8
     <section className="py-8 md:py-12 bg-accent border-b-2 border-slate-900">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         
@@ -58,7 +59,7 @@ const SpillTheGigSection = () => {
             onClick={handleToast}
             className="bg-white border-2 border-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-black shadow-hard-sm hover:shadow-none active:translate-y-0.5 transition cursor-pointer flex items-center gap-2"
           >
-            <i className="fa-solid fa-pen-nib"></i> <span class="hidden md:inline">Tulis Spill</span>
+            <i className="fa-solid fa-pen-nib"></i> <span className="hidden md:inline">Tulis Spill</span>
           </button>
         </div>
         
