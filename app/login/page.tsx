@@ -1,5 +1,3 @@
-export const dynamic = 'force-dynamic'; // Tambahkan ini
-
 'use client';
 
 import Link from 'next/link';
@@ -12,14 +10,13 @@ export default function LoginPage() {
   const { showToast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isWaMode, setIsWaMode] = useState(false); // Mode input nomor WA
+  const [isWaMode, setIsWaMode] = useState(false);
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   
   const supabase = createClient();
 
-  // 1. Login Google
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -35,19 +32,17 @@ export default function LoginPage() {
     }
   };
 
-  // 2. Kirim OTP WhatsApp
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Format nomor ke internasional (62)
     let formattedPhone = phone;
     if (phone.startsWith('0')) formattedPhone = '62' + phone.slice(1);
 
     const { error } = await supabase.auth.signInWithOtp({
       phone: formattedPhone,
       options: {
-        channel: 'whatsapp', // Wajib setting Twilio di Supabase Dashboard
+        channel: 'whatsapp',
       },
     });
 
@@ -61,7 +56,6 @@ export default function LoginPage() {
     }
   };
 
-  // 3. Verifikasi OTP
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -100,7 +94,6 @@ export default function LoginPage() {
           <h1 className="text-3xl font-black text-slate-900 mb-2">Masuk Dulu, Bos.</h1>
           <p className="text-slate-500 font-bold text-sm mb-8">Pilih jalan ninja lo buat login.</p>
 
-          {/* OPSI 1: GOOGLE */}
           {!isWaMode && (
             <>
               <button 
@@ -126,7 +119,6 @@ export default function LoginPage() {
             </>
           )}
 
-          {/* OPSI 2: WHATSAPP FORM */}
           {isWaMode && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
               {!isOtpSent ? (
