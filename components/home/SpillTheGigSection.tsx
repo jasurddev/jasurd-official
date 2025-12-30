@@ -1,11 +1,9 @@
 'use client';
 
 import React from 'react';
-// Pastikan path ini benar mengarah ke file di atas
 import SpillCard from '@/components/ui/SpillCard';
 
 const SpillTheGigSection = () => {
-  // Mock Data
   const spills = [
     {
       id: 1,
@@ -45,24 +43,26 @@ const SpillTheGigSection = () => {
   };
 
   return (
-    <section className="py-12 bg-accent border-b-2 border-slate-900">
+    // DIET: py-12 jadi py-8
+    <section className="py-8 md:py-12 bg-accent border-b-2 border-slate-900">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
+        
+        <div className="flex items-center justify-between mb-6 md:mb-8">
           <div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-1">Spill The Gig 🗣️</h2>
-            <p className="text-sm font-bold text-slate-800">
-              Drama lapangan & bukti cuan nyata. <span className="bg-slate-900 text-white px-2 py-0.5 text-[10px] rounded transform -rotate-2 inline-block">No Pic = Hoax</span>
+            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Spill The Gig 🗣️</h2>
+            <p className="text-xs md:text-sm font-bold text-slate-800">
+              Drama lapangan & bukti cuan nyata.
             </p>
           </div>
           <button 
             onClick={handleToast}
-            className="bg-white border-2 border-slate-900 px-4 py-2 rounded-lg text-xs font-black shadow-hard-sm hover:shadow-none active:translate-y-0.5 transition cursor-pointer flex items-center gap-2"
+            className="bg-white border-2 border-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-black shadow-hard-sm hover:shadow-none active:translate-y-0.5 transition cursor-pointer flex items-center gap-2"
           >
-            <i className="fa-solid fa-pen-nib"></i> <span className="hidden md:inline">Tulis Spill</span>
+            <i className="fa-solid fa-pen-nib"></i> <span class="hidden md:inline">Tulis Spill</span>
           </button>
         </div>
         
-        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 md:gap-4 pb-4 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
           {spills.map((spill) => (
             <SpillCard 
               key={spill.id}
@@ -70,6 +70,7 @@ const SpillTheGigSection = () => {
             />
           ))}
         </div>
+
       </div>
     </section>
   );

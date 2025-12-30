@@ -1,80 +1,94 @@
-'use client';
-
-import { motion } from 'framer-motion';
-import { Star, BadgeCheck } from 'lucide-react';
+import Link from 'next/link';
+import Image from 'next/image';
 
 interface GigCardProps {
+  id: string | number;
   title: string;
   price: string;
-  username: string;
-  category: string;
-  rating: number;
-  imageUrl?: string;
-  verified?: boolean;
+  image?: string;
+  category?: string;
+  user: {
+    name: string;
+    username: string;
+    avatar: string;
+    verified?: boolean;
+  };
+  type: 'solver' | 'seeker';
+  isPremium?: boolean;
 }
 
-const GigCard = ({ title, price, username, category, rating, imageUrl, verified }: GigCardProps) => {
+const GigCard = ({ id, title, price, image, category, user, type, isPremium }: GigCardProps) => {
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      className="border-2 md:border-4 border-black bg-white flex flex-col relative transition-all duration-200 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] cursor-pointer h-full overflow-hidden"
+    <div 
+      className={`relative h-full flex flex-col justify-between
+        ${type === 'solver' 
+          ? 'bg-white hover:-translate-y-1 hover:shadow-hard' 
+          : 'bg-white hover:shadow-hard'
+        }
+        border-2 ${isPremium ? 'border-yellow-400 bg-yellow-50' : 'border-slate-900'} 
+        rounded-2xl p-3 shadow-hard-sm transition-all duration-200 group
+      `}
     >
-      {/* Category Tag */}
-      <div className="absolute top-1 right-1 md:top-2 md:right-2 bg-yellow-400 border border-black px-1.5 py-0.5 text-[9px] md:text-xs font-bold uppercase tracking-wider z-10 shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]">
-        {category}
-      </div>
-
-      {/* Image Placeholder */}
-      <div className="h-28 md:h-48 w-full bg-slate-100 border-b-2 md:border-b-4 border-black relative overflow-hidden flex items-center justify-center group">
-         {imageUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img 
-              src={imageUrl} 
-              alt={title} 
-              className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500" 
-            />
-         ) : (
-            // Pattern Dot Background
-            <div className="w-full h-full opacity-10 bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:8px_8px] flex items-center justify-center">
-                <span className="text-2xl md:text-4xl grayscale opacity-50">👾</span>
-            </div> 
-         )}
-      </div>
-
-      {/* Content Container */}
-      <div className="p-2 md:p-4 flex flex-col gap-1 md:gap-2 flex-grow justify-between">
-        
-        {/* Title & User */}
-        <div>
-            <h3 className="font-bold text-xs md:text-lg leading-tight line-clamp-2 mb-1.5 md:mb-2 min-h-[2.5em]">
-                {title}
-            </h3>
-            
-            <div className="flex items-center gap-1.5 text-[10px] md:text-sm font-medium text-gray-600">
-                <div className="w-4 h-4 md:w-6 md:h-6 rounded-full bg-blue-500 border border-black flex items-center justify-center text-[8px] md:text-[10px] text-white font-bold shrink-0">
-                    {username.charAt(0)}
-                </div>
-                <span className="truncate max-w-[80px] md:max-w-full">{username}</span>
-                {verified && <BadgeCheck className="w-3 h-3 md:w-4 md:h-4 text-blue-600 fill-blue-100 shrink-0" />}
-            </div>
+      {/* Badge Premium */}
+      {isPremium && (
+        <div className="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded-bl-lg border-l-2 border-b-2 border-yellow-500 z-30 pointer-events-none flex items-center gap-1">
+          SULTAN <i className="fa-solid fa-crown text-[8px]"></i>
         </div>
+      )}
 
-        {/* Footer */}
-        <div className="mt-2 pt-2 border-t border-dashed border-black/30 flex justify-between items-center">
-            <div className="flex items-center gap-1 text-[10px] md:text-xs font-bold bg-black text-white px-1.5 py-0.5 rounded-sm">
-                <Star className="w-2 h-2 md:w-3 md:h-3 fill-yellow-400 text-yellow-400" />
-                {rating}
+      {/* AREA 1: KLIK KE DETAIL JASA */}
+      <Link href={`/lounge/${id}`} className="flex-grow block relative z-10">
+        {/* Image Section (Solver Only) */}
+        {type === 'solver' && image ? (
+          <div className={`aspect-square bg-slate-100 rounded-xl mb-3 overflow-hidden relative border-2 ${isPremium ? 'border-yellow-200' : 'border-slate-100'} group-hover:border-slate-900 transition`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt={title} className="w-full h-full object-cover" />
+            <div className="absolute bottom-2 right-2 bg-accent px-2 py-1 rounded-lg text-xs font-black border-2 border-slate-900 shadow-sm">
+              {price}
             </div>
-
-            <div className="text-right">
-                <span className="text-[10px] md:text-xl font-black bg-green-200 px-1 border border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] md:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] block md:inline-block">
-                {price}
+          </div>
+        ) : (
+          // Layout Khusus Seeker
+          <div className="mb-4">
+             <div className="flex justify-between items-start mb-2">
+                <span className="bg-red-500 text-white px-2 py-1 rounded text-[10px] font-black uppercase inline-block border-2 border-slate-900 transform -rotate-1">
+                  URGENT
                 </span>
-            </div>
-        </div>
+                <span className="text-xs font-black text-slate-900 bg-slate-100 px-2 py-1 rounded border border-slate-200">
+                  {price}
+                </span>
+             </div>
+          </div>
+        )}
+
+        {/* Content Title */}
+        <h3 className={`font-bold text-slate-900 text-sm mb-2 leading-snug line-clamp-2 ${type === 'seeker' ? 'text-lg' : ''}`}>
+          {title}
+        </h3>
+      </Link>
+      
+      {/* AREA 2: KLIK KE PROFIL USER */}
+      <div className={`pt-2 border-t ${isPremium ? 'border-yellow-200' : 'border-slate-100'} mt-auto relative z-20 pointer-events-auto`}>
+        <Link 
+          href={`/u/${user.username}`} 
+          className="flex items-center gap-2 hover:bg-slate-100 p-1.5 -ml-1.5 rounded-lg transition-colors w-full cursor-pointer"
+        >
+          <div className="w-6 h-6 bg-slate-200 rounded-full overflow-hidden border border-slate-300 shrink-0 relative">
+             {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+            {user.verified && (
+              <div className="absolute bottom-0 right-0 bg-blue-500 text-white text-[6px] w-2.5 h-2.5 flex items-center justify-center rounded-full border border-white">
+                <i className="fa-solid fa-check"></i>
+              </div>
+            )}
+          </div>
+          <span className="text-xs text-slate-500 font-bold truncate hover:text-primary hover:underline">
+            @{user.username}
+          </span>
+        </Link>
       </div>
-    </motion.div>
+
+    </div>
   );
 };
 
