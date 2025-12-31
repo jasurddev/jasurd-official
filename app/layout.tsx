@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  metadataBase: new URL('https://jasurd.com'), 
   
   title: "JASURD | Marketplace Jasa Unik & Anti Mainstream Indonesia",
-  description: "Uangin waktu lu, Nyari Duit Harusnya Mudah. Marketplace jasa paling unik, aman (Escrow), dan anti mainstream di Indonesia.",
+  description: "Uangin waktu lu, Kalo Hidup Lagi Susah, Nyari Duit Harusnya Mudah. Marketplace jasa paling unik, aman (Escrow), dan anti mainstream di Indonesia.",
   manifest: "/manifest.json",
   openGraph: {
     title: "JASURD | Marketplace Jasa Unik",

@@ -39,11 +39,7 @@ const HeroSection = () => {
           Uangin Waktu Lo, <br className="hidden md:block" />
           <span className="relative inline-block text-white mt-1 px-2 py-0.5 md:mt-2 md:px-3 md:py-1">
             <span className="absolute inset-0 bg-primary skew-x-[-3deg] border-2 border-slate-900 shadow-hard-sm -z-10 rounded-lg"></span>
-            <span className="relative z-10">Kalo Hidup Lagi Susah,</span>
-          </span>
-          <br className="hidden md:block" />
-          <span className="relative inline-block text-slate-900 mt-1 md:mt-2">
-             Nyari Duit Harusnya Mudah.
+            <span className="relative z-10">Nyari Duit Harusnya Mudah.</span>
           </span>
         </motion.h1>
 
