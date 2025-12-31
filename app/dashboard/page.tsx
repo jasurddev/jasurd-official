@@ -12,12 +12,13 @@ export default function DashboardPage() {
   const supabase = createClient();
   
   const [profile, setProfile] = useState<any>(null);
+  const [myGigs, setMyGigs] = useState<any[]>([]); // State buat list jasa sendiri
   const [loading, setLoading] = useState(true);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showPostGig, setShowPostGig] = useState(false);
 
   useEffect(() => {
-    const getProfile = async () => {
+    const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
@@ -25,22 +26,28 @@ export default function DashboardPage() {
         return;
       }
 
-      const { data, error } = await supabase
+      // 1. Get Profile
+      const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
-      } else {
-        setProfile(data);
-      }
+      if (profileData) setProfile(profileData);
+
+      // 2. Get My Gigs
+      const { data: gigsData } = await supabase
+        .from('gigs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (gigsData) setMyGigs(gigsData);
       
       setLoading(false);
     };
 
-    getProfile();
+    getData();
   }, [router, supabase]);
 
   const handleLogout = async () => {
@@ -115,14 +122,46 @@ export default function DashboardPage() {
           <i className="fa-solid fa-chevron-right text-slate-900"></i>
         </button>
 
+        {/* LIST JASA SAYA (NEW FEATURE) */}
+        <div className="space-y-4">
+          <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
+            Jasa Saya 💼 <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{myGigs.length}</span>
+          </h3>
+          
+          {myGigs.length > 0 ? (
+            myGigs.map((gig) => (
+              <div key={gig.id} className="bg-white p-4 rounded-2xl border-2 border-slate-200 flex justify-between items-center hover:border-slate-900 transition group">
+                <div className="flex-1 min-w-0 pr-4">
+                  <h4 className="font-bold text-slate-900 text-sm line-clamp-1 mb-1">{gig.title}</h4>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className={`font-bold ${gig.is_active ? 'text-green-600' : 'text-red-500'}`}>
+                      {gig.is_active ? '● Aktif' : '● Nonaktif'}
+                    </span>
+                    <span className="text-slate-400">•</span>
+                    <span className="font-bold text-slate-600">Rp {gig.price.toLocaleString()}</span>
+                  </div>
+                </div>
+                <Link 
+                  href={`/dashboard/gigs/${gig.id}/edit`} 
+                  className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 border-2 border-transparent group-hover:border-slate-200 hover:text-primary transition"
+                >
+                  <i className="fa-solid fa-pen-to-square"></i>
+                </Link>
+              </div>
+            ))
+          ) : (
+            <div className="text-center p-8 bg-white rounded-3xl border-2 border-dashed border-slate-300">
+              <p className="text-slate-400 text-sm font-bold">Belum ada jasa. Posting dulu gih!</p>
+            </div>
+          )}
+        </div>
+
         {/* Menu Grid */}
         <div className="grid grid-cols-2 gap-3">
            <Link href={`/u/${profile?.username}`} className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-900 transition flex items-center gap-3 group">
               <i className="fa-regular fa-eye text-slate-400 group-hover:text-slate-900"></i>
               <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Lihat Profil Publik</span>
            </Link>
-           
-           {/* FIX: Tombol ini sekarang pake Link ke /dashboard/edit */}
            <Link href="/dashboard/edit" className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-900 transition flex items-center gap-3 group text-left">
               <i className="fa-solid fa-gear text-slate-400 group-hover:text-slate-900"></i>
               <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Edit Profil</span>
