@@ -10,16 +10,16 @@ export default function PostArticlePage() {
   const { showToast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null); // State File
   
   const [formData, setFormData] = useState({
     title: '',
     category: 'Tech Hacks',
     summary: '',
-    content: '', // HTML Content
-    image_url: '',
+    content: '',
+    image_url: '', // Nanti diisi otomatis dari upload
   });
 
-  // Helper Slug
   const createSlug = (title: string) => {
     return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   };
@@ -28,14 +28,43 @@ export default function PostArticlePage() {
     e.preventDefault();
     setIsLoading(true);
 
+    let finalImageUrl = formData.image_url;
+
+    // 1. UPLOAD GAMBAR (Jika ada file)
+    if (file) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `article-${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('gig-images') // Pake bucket yang sama aja
+        .upload(fileName, file);
+
+      if (uploadError) {
+        showToast("Gagal upload gambar!", "error");
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('gig-images')
+        .getPublicUrl(fileName);
+        
+      finalImageUrl = urlData.publicUrl;
+    }
+
+    // 2. INSERT ARTIKEL
     const slug = createSlug(formData.title);
 
     const { error } = await supabase
       .from('articles')
       .insert({
-        ...formData,
+        title: formData.title,
+        category: formData.category,
+        summary: formData.summary,
+        content: formData.content,
+        image_url: finalImageUrl, // Pake URL hasil upload
         slug: slug,
-        is_published: true, // Langsung publish
+        is_published: true,
         author: 'Admin Jasurd'
       });
 
@@ -54,14 +83,26 @@ export default function PostArticlePage() {
         <h1 className="text-3xl font-black text-slate-900 mb-6">Tulis Artikel Baru ✍️</h1>
         
         <form onSubmit={handleSubmit} className="space-y-5">
+          
+          {/* INPUT GAMBAR */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Cover Image</label>
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+              className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 text-sm font-bold outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300"
+            />
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Judul</label>
-            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-bold outline-none" required />
+            <input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-white border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-bold outline-none" required />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Kategori</label>
-            <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-bold outline-none">
+            <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-white border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-bold outline-none">
               <option>Tech Hacks</option>
               <option>Success Story</option>
               <option>Safety</option>
@@ -71,18 +112,13 @@ export default function PostArticlePage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Image URL (Unsplash)</label>
-            <input type="text" value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-medium outline-none" placeholder="https://images.unsplash.com/..." required />
-          </div>
-
-          <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Summary (Untuk Card)</label>
-            <textarea rows={2} value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-medium outline-none" required></textarea>
+            <textarea rows={2} value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} className="w-full bg-white border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-medium outline-none" required></textarea>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Konten (HTML)</label>
-            <textarea rows={10} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-mono text-sm outline-none" placeholder="<p>Paragraf 1...</p>" required></textarea>
+            <textarea rows={10} value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} className="w-full bg-white border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-mono text-sm outline-none" placeholder="<p>Paragraf 1...</p>" required></textarea>
             <p className="text-[10px] text-slate-400 mt-1">*Support tag HTML dasar: p, h3, strong, ul, li</p>
           </div>
 
