@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import GigCard from '@/components/ui/GigCard';
 import { createClient } from '@/lib/supabase';
@@ -48,6 +49,12 @@ export default function PublicProfilePage() {
   if (loading) return <div className="min-h-screen bg-surface flex items-center justify-center">Loading...</div>;
   if (!profile) return <div className="min-h-screen bg-surface flex items-center justify-center font-bold text-slate-500">User gak ketemu, Bos.</div>;
 
+  // Mock Reviews (Sementara)
+  const reviews = [
+    { id: 1, user: "Siska", text: "Joki antrinya gercep parah! Dapet tiket VIP sesuai request.", rating: 5, date: "2 hari lalu" },
+    { id: 2, user: "Doni", text: "Enak diajak ngobrol, pendengar yang baik.", rating: 4, date: "1 minggu lalu" }
+  ];
+
   return (
     <div className="min-h-screen bg-surface pb-24">
       
@@ -56,7 +63,10 @@ export default function PublicProfilePage() {
         <Link href="/lounge" className="w-10 h-10 bg-white/90 backdrop-blur border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 shadow-hard btn-brutal pointer-events-auto">
           <i className="fa-solid fa-arrow-left"></i>
         </Link>
-        <button className="w-10 h-10 bg-white/90 backdrop-blur border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 shadow-hard btn-brutal pointer-events-auto">
+        <button 
+          onClick={() => alert('Link Profile Disalin!')}
+          className="w-10 h-10 bg-white/90 backdrop-blur border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 shadow-hard btn-brutal pointer-events-auto"
+        >
           <i className="fa-solid fa-share-nodes"></i>
         </button>
       </div>
@@ -103,6 +113,7 @@ export default function PublicProfilePage() {
                 <GigCard 
                   key={gig.id} 
                   id={gig.id}
+                  slug={gig.slug} // FIX: Tambahkan prop slug di sini
                   title={gig.title}
                   price={new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(gig.price)}
                   image={gig.image_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
@@ -111,6 +122,29 @@ export default function PublicProfilePage() {
                   type="solver"
                 />
               )) : <p className="text-center text-slate-400 text-sm font-bold py-10">Belum ada jasa yang diposting.</p>}
+            </div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-white border-2 border-slate-100 rounded-xl p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-slate-200 rounded-full overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user}`} alt="User" />
+                      </div>
+                      <span className="text-xs font-bold text-slate-900">@{review.user}</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400">{review.date}</span>
+                  </div>
+                  <div className="text-yellow-400 text-[10px] mb-2">
+                    {[...Array(review.rating)].map((_, i) => <i key={i} className="fa-solid fa-star"></i>)}
+                  </div>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">"{review.text}"</p>
+                </div>
+              ))}
             </div>
           )}
         </div>
