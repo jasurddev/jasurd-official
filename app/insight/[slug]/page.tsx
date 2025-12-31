@@ -3,11 +3,10 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
-export default function ArticleDetailPage() {
-  const params = useParams();
-
-  // Mock Data
-  const article = {
+// DATABASE ARTIKEL DUMMY (Lengkap dengan konten)
+const articlesDB = [
+  {
+    slug: "3-ai-buat-jago-ngoding-modal-prompt",
     title: "3 AI Buat Jago Ngoding Modal Prompt Doang.",
     category: "Tech Hacks",
     date: "12 Jan 2024",
@@ -16,20 +15,40 @@ export default function ArticleDetailPage() {
     content: `
       <p class="mb-4">Zaman sekarang gak perlu jago syntax sampai botak. Cukup jago <strong>Prompt Engineering</strong>, lo bisa bikin aplikasi sekelas startup unicorn.</p>
       <h3 class="text-xl font-black text-slate-900 mt-6 mb-2">1. ChatGPT (Si Paling Umum)</h3>
-      <p class="mb-4">Buat logic dasar dan debugging, ini masih juara.</p>
+      <p class="mb-4">Buat logic dasar dan debugging, ini masih juara. Kuncinya ada di konteks.</p>
       <h3 class="text-xl font-black text-slate-900 mt-6 mb-2">2. Claude 3.5 Sonnet (Si Paling Pinter)</h3>
       <p class="mb-4">Kalau butuh kodingan yang lebih manusiawi dan minim bug, Claude jagonya.</p>
       <div class="bg-indigo-50 p-4 rounded-xl border-l-4 border-indigo-500 my-6">
         <p class="text-sm font-bold text-indigo-900">💡 Pro Tip: Gabungin ketiganya buat hasil maksimal.</p>
       </div>
     `
-  };
+  },
+  {
+    slug: "kisah-rian-beli-motor-cash-dari-joki-tiket",
+    title: "Kisah Rian Beli Motor Cash dari Joki Tiket.",
+    category: "Success Story",
+    date: "10 Jan 2024",
+    author: "Rian Runner",
+    image: "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=1200&q=80",
+    content: `
+      <p class="mb-4">Gue awalnya cuma iseng antri tiket Coldplay buat pacar. Eh, pas dijual lagi, untungnya bisa buat DP motor.</p>
+      <p class="mb-4">Dari situ gue sadar, <strong>kesabaran adalah mata uang</strong>. Orang kaya itu males antri, dan di situlah peluang kita.</p>
+    `
+  },
+  // ... Tambahkan artikel lain sesuai slug di list page
+];
+
+export default function ArticleDetailPage() {
+  const params = useParams();
+  
+  // Cari artikel berdasarkan slug URL
+  const article = articlesDB.find(a => a.slug === params.slug);
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: article.title,
+          title: article?.title,
           url: window.location.href,
         });
       } catch (error) {
@@ -40,6 +59,14 @@ export default function ArticleDetailPage() {
       alert('Link artikel disalin!');
     }
   };
+
+  if (!article) return (
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4 text-center">
+      <h1 className="text-4xl font-black text-slate-900 mb-2">404</h1>
+      <p className="text-slate-500 font-bold mb-6">Artikelnya ilang atau belum ditulis, Bos.</p>
+      <Link href="/insight" className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold">Balik ke Insight</Link>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white pb-24">

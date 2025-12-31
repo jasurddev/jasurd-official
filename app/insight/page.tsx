@@ -1,11 +1,12 @@
 import Link from 'next/link';
-import InsightCard from '@/components/home/InsightCard'; // Pastikan path ini benar
+import InsightCard from '@/components/home/InsightCard';
 
 export default function InsightPage() {
-  // Mock Data Artikel
+  // Mock Data Artikel (Sekarang pake properti 'slug')
   const articles = [
     {
       id: 1,
+      slug: "3-ai-buat-jago-ngoding-modal-prompt",
       title: "3 AI Buat Jago Ngoding Modal Prompt Doang.",
       category: "Tech Hacks",
       summary: "Zaman sekarang gak perlu jago syntax. Cukup jago prompt engineering. Tools: ChatGPT, Claude, GitHub Copilot.",
@@ -15,6 +16,7 @@ export default function InsightPage() {
     },
     {
       id: 2,
+      slug: "kisah-rian-beli-motor-cash-dari-joki-tiket",
       title: "Kisah Rian Beli Motor Cash dari Joki Tiket.",
       category: "Success Story",
       summary: "\"Cuma modal antri tiket konser, gue bisa kebeli NMAX cash tanpa nyicil.\"",
@@ -22,6 +24,7 @@ export default function InsightPage() {
     },
     {
       id: 3,
+      slug: "tips-hindari-red-flag-client",
       title: "Tips Hindari Red Flag Client 🚩",
       category: "Safety",
       summary: "Jangan mau diajak transaksi luar aplikasi! Kenali ciri-ciri penipu berkedok sultan.",
@@ -29,6 +32,7 @@ export default function InsightPage() {
     },
     {
       id: 4,
+      slug: "panduan-rate-card-teman-kondangan-2024",
       title: "Panduan Rate Card 'Teman Kondangan' 2024",
       category: "Guide",
       summary: "Teman kondangan pasif: 150k-250k. Aktif (bantu ambil makan): 300k-500k.",
@@ -36,6 +40,7 @@ export default function InsightPage() {
     },
     {
       id: 5,
+      slug: "cara-menjadi-pendengar-curhat-yang-baik",
       title: "Cara Menjadi Pendengar Curhat yang Baik",
       category: "Skill",
       summary: "Modal kuping doang bisa dapet duit? Bisa banget. Pelajari teknik active listening.",
@@ -65,10 +70,30 @@ export default function InsightPage() {
           {articles.map((article) => (
             <InsightCard 
               key={article.id}
-              {...article}
+              id={article.slug} // FIX: Kirim slug sebagai ID ke card
+              title={article.title}
+              category={article.category}
+              summary={article.summary}
+              image={article.image}
+              isFeatured={article.isFeatured}
+              color={article.color}
             />
           ))}
         </div>
+
+        {/* Newsletter */}
+        <div className="mt-16 bg-slate-900 rounded-3xl p-8 md:p-12 text-center relative overflow-hidden border-2 border-slate-900 shadow-hard">
+           <div className="relative z-10">
+              <h2 className="text-2xl md:text-4xl font-black text-white mb-4">Jangan Ketinggalan Info Cuan!</h2>
+              <p className="text-slate-400 mb-8 max-w-lg mx-auto">Subscribe newsletter kita. No spam, isinya daging semua.</p>
+              <div className="flex max-w-md mx-auto gap-2">
+                 <input type="email" placeholder="Email lo..." className="flex-1 px-4 py-3 rounded-xl font-bold text-slate-900 outline-none border-2 border-transparent focus:border-accent" />
+                 <button className="bg-accent text-slate-900 px-6 py-3 rounded-xl font-black hover:bg-accent-hover transition">Gas</button>
+              </div>
+           </div>
+           <div className="absolute top-0 right-0 w-64 h-64 bg-primary rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+        </div>
+
       </div>
     </div>
   );
