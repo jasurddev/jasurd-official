@@ -28,7 +28,7 @@ export default function GigDetailPage() {
             is_verified
           )
         `)
-        .eq('id', params.id)
+        .eq('slug', params.slug) // Fetch by Slug
         .single();
 
       if (error) {
@@ -39,8 +39,8 @@ export default function GigDetailPage() {
       setLoading(false);
     };
 
-    if (params.id) fetchGigDetail();
-  }, [params.id, supabase]);
+    if (params.slug) fetchGigDetail();
+  }, [params.slug, supabase]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -70,7 +70,6 @@ export default function GigDetailPage() {
   return (
     <div className="min-h-screen bg-pattern pb-32 md:pb-12">
       
-      {/* Navbar (Back & Share) */}
       <div className="fixed top-0 left-0 w-full z-40 px-4 py-4 pointer-events-none flex justify-between items-center">
         <Link href="/lounge" className="pointer-events-auto inline-flex w-10 h-10 bg-white border-2 border-slate-900 rounded-full items-center justify-center text-slate-900 shadow-hard btn-brutal">
           <i className="fa-solid fa-arrow-left"></i>
@@ -80,7 +79,6 @@ export default function GigDetailPage() {
         </button>
       </div>
 
-      {/* Hero Image */}
       <div className="h-64 md:h-96 bg-slate-900 relative overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img 
@@ -94,7 +92,6 @@ export default function GigDetailPage() {
       <div className="max-w-5xl mx-auto px-4 md:px-6 -mt-20 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* LEFT COLUMN */}
           <div className="md:col-span-2 space-y-6">
             <div className="bg-white rounded-3xl p-6 border-2 border-slate-900 shadow-hard">
               <div className="flex items-center gap-2 mb-3">
@@ -108,6 +105,10 @@ export default function GigDetailPage() {
               <h1 className="text-2xl md:text-4xl font-black text-slate-900 leading-tight mb-2">
                 {gig.title}
               </h1>
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
+                <i className="fa-solid fa-star text-yellow-400"></i> 
+                <span>New (Belum ada review)</span>
+              </div>
             </div>
 
             <div className="bg-white rounded-3xl p-6 border-2 border-slate-900 shadow-hard-sm">
@@ -124,6 +125,11 @@ export default function GigDetailPage() {
               <div className="w-16 h-16 bg-slate-200 rounded-full border-2 border-slate-900 overflow-hidden shrink-0 relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={gig.profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurd"} alt={gig.profiles?.username} className="w-full h-full object-cover" />
+                {gig.profiles?.is_verified && (
+                  <div className="absolute bottom-0 right-0 bg-blue-500 text-white w-5 h-5 flex items-center justify-center rounded-full border-2 border-white text-[10px]">
+                    <i className="fa-solid fa-check"></i>
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 <h4 className="font-black text-slate-900 text-lg group-hover:text-primary transition-colors">{gig.profiles?.full_name}</h4>
@@ -135,7 +141,6 @@ export default function GigDetailPage() {
             </Link>
           </div>
 
-          {/* RIGHT COLUMN */}
           <div className="md:col-span-1">
             <div className="sticky top-24 bg-white rounded-3xl p-6 border-2 border-slate-900 shadow-hard">
               <p className="text-xs font-bold text-slate-400 uppercase mb-1">Total Harga</p>
@@ -146,13 +151,15 @@ export default function GigDetailPage() {
               <button onClick={() => setIsModalOpen(true)} className="w-full py-4 bg-primary text-white rounded-xl font-black shadow-hard border-2 border-slate-900 text-lg hover:bg-primary-dark hover:translate-y-[-2px] transition-all flex items-center justify-center gap-2">
                 Book Sekarang <i className="fa-solid fa-bolt"></i>
               </button>
+              <p className="text-[10px] text-slate-400 font-bold text-center mt-4">
+                <i className="fa-solid fa-shield-halved"></i> Dijamin aman pake Escrow Jasurd.
+              </p>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* Mobile Sticky Action Bar */}
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t-2 border-slate-900 p-4 z-50 flex items-center justify-between pb-8">
         <div>
           <p className="text-[10px] font-bold text-slate-400 uppercase">Harga</p>

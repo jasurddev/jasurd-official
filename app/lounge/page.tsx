@@ -9,12 +9,28 @@ export default function LoungePage() {
   const [activeTab, setActiveTab] = useState<'solver' | 'seeker'>('solver');
   const [gigs, setGigs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // LOGIC HIDE ON SCROLL
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Fetch Data Real (Filtered by Type)
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   useEffect(() => {
     const fetchGigs = async () => {
       setLoading(true);
-      
       const { data, error } = await supabase
         .from('gigs')
         .select(`
@@ -27,7 +43,7 @@ export default function LoungePage() {
           )
         `)
         .eq('is_active', true)
-        .eq('type', activeTab) // <--- FILTER DI SINI (solver/seeker)
+        .eq('type', activeTab)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -39,14 +55,14 @@ export default function LoungePage() {
     };
 
     fetchGigs();
-  }, [supabase, activeTab]); // <--- Re-fetch kalau tab berubah
+  }, [supabase, activeTab]);
 
-  // Format Data biar sesuai sama GigCard
   const formattedGigs = gigs.map(gig => ({
     id: gig.id,
+    slug: gig.slug, // Pass Slug
     title: gig.title,
     price: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(gig.price) + (gig.unit !== 'flat' ? `/${gig.unit}` : ''),
-    image: gig.image_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80", // Placeholder kalau gak ada gambar
+    image: gig.image_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
     category: gig.category,
     user: {
       name: gig.profiles?.full_name || "Anonim",
@@ -54,7 +70,7 @@ export default function LoungePage() {
       avatar: gig.profiles?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurd",
       verified: gig.profiles?.is_verified
     },
-    type: 'solver', // Sementara semua dianggap solver dulu
+    type: activeTab,
     isPremium: false
   }));
 
@@ -67,8 +83,10 @@ export default function LoungePage() {
   return (
     <div className="min-h-screen bg-pattern pb-24 pt-16 md:pt-20">
       
-      {/* Sticky Header */}
-      <div className="sticky top-16 md:top-20 z-30 bg-white/95 backdrop-blur border-b-2 border-slate-900 px-4 md:px-6 py-2 shadow-sm transition-all">
+      <div className={`
+        sticky top-16 md:top-20 z-30 bg-white/95 backdrop-blur border-b-2 border-slate-900 px-4 md:px-6 py-2 shadow-sm transition-transform duration-300 ease-in-out
+        ${isVisible ? 'translate-y-0' : '-translate-y-[150%]'}
+      `}>
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h1 className="text-xl md:text-3xl font-black text-slate-900">
@@ -84,26 +102,32 @@ export default function LoungePage() {
             </div>
           </div>
 
-          {/* Search Bar */}
           <div className="relative group z-20 mb-2">
             <div className="absolute inset-0 bg-slate-900 rounded-xl translate-y-0.5 translate-x-0.5 transition-transform group-hover:translate-x-1 group-hover:translate-y-1"></div>
             <div className="relative flex bg-white border-2 border-slate-900 rounded-xl p-1 items-center shadow-sm">
               <i className="fa-solid fa-magnifying-glass text-slate-400 ml-3 text-sm"></i>
-              <input type="text" placeholder="Cari jasa..." className="w-full px-2 py-1.5 bg-transparent outline-none text-slate-900 placeholder-slate-400 font-bold text-xs md:text-sm" />
+              <input type="text" placeholder={activeTab === 'solver' ? "Cari jasa..." : "Cari bantuan..."} className="w-full px-2 py-1.5 bg-transparent outline-none text-slate-900 placeholder-slate-400 font-bold text-xs md:text-sm" />
               <button className="bg-accent text-slate-900 px-3 py-1.5 rounded-lg font-black hover:bg-accent-hover transition border-2 border-slate-900 text-[10px] uppercase tracking-wide">Cari</button>
             </div>
+          </div>
+
+          <div className="flex overflow-x-auto no-scrollbar gap-1.5 pb-1">
+             {['#Jastip', '#TemanCurhat', '#JokiAntri', '#SurpriseUltah', '#Gaming', '#Absurd'].map((tag) => (
+               <span key={tag} className="flex-shrink-0 px-2 py-1 bg-surface border-2 border-slate-200 text-slate-600 rounded-md text-[10px] font-bold hover:border-slate-900 hover:text-slate-900 cursor-pointer transition select-none flex items-center gap-1">
+                 {tag.replace('#', '')}
+               </span>
+             ))}
           </div>
         </div>
       </div>
 
-      {/* Content Grid */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-4">
         {loading ? (
           <div className="text-center py-20"><i className="fa-solid fa-spinner fa-spin text-3xl text-slate-300"></i></div>
         ) : formattedGigs.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
             {formattedGigs.map((gig) => (
-              <GigCard key={gig.id} {...gig} type="solver" />
+              <GigCard key={gig.id} {...gig} />
             ))}
           </div>
         ) : (

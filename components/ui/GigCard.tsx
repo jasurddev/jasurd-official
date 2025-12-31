@@ -3,6 +3,7 @@ import Image from 'next/image';
 
 interface GigCardProps {
   id: string | number;
+  slug: string; // Tambah ini
   title: string;
   price: string;
   image?: string;
@@ -17,7 +18,7 @@ interface GigCardProps {
   isPremium?: boolean;
 }
 
-const GigCard = ({ id, title, price, image, category, user, type, isPremium }: GigCardProps) => {
+const GigCard = ({ id, slug, title, price, image, category, user, type, isPremium }: GigCardProps) => {
   return (
     <div 
       className={`relative h-full flex flex-col justify-between
@@ -29,16 +30,14 @@ const GigCard = ({ id, title, price, image, category, user, type, isPremium }: G
         rounded-2xl p-3 shadow-hard-sm transition-all duration-200 group
       `}
     >
-      {/* Badge Premium */}
       {isPremium && (
         <div className="absolute top-0 right-0 bg-yellow-400 text-slate-900 text-[9px] font-black px-2 py-0.5 rounded-bl-lg border-l-2 border-b-2 border-yellow-500 z-30 pointer-events-none flex items-center gap-1">
           SULTAN <i className="fa-solid fa-crown text-[8px]"></i>
         </div>
       )}
 
-      {/* AREA 1: KLIK KE DETAIL JASA */}
-      <Link href={`/lounge/${id}`} className="flex-grow block relative z-10">
-        {/* Image Section (Solver Only) */}
+      {/* AREA 1: KLIK KE DETAIL JASA (Pake Slug) */}
+      <Link href={`/lounge/${slug}`} className="flex-grow block relative z-10">
         {type === 'solver' && image ? (
           <div className={`aspect-square bg-slate-100 rounded-xl mb-3 overflow-hidden relative border-2 ${isPremium ? 'border-yellow-200' : 'border-slate-100'} group-hover:border-slate-900 transition`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -48,7 +47,6 @@ const GigCard = ({ id, title, price, image, category, user, type, isPremium }: G
             </div>
           </div>
         ) : (
-          // Layout Khusus Seeker
           <div className="mb-4">
              <div className="flex justify-between items-start mb-2">
                 <span className="bg-red-500 text-white px-2 py-1 rounded text-[10px] font-black uppercase inline-block border-2 border-slate-900 transform -rotate-1">
@@ -61,7 +59,6 @@ const GigCard = ({ id, title, price, image, category, user, type, isPremium }: G
           </div>
         )}
 
-        {/* Content Title */}
         <h3 className={`font-bold text-slate-900 text-sm mb-2 leading-snug line-clamp-2 ${type === 'seeker' ? 'text-lg' : ''}`}>
           {title}
         </h3>
