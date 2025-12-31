@@ -11,33 +11,36 @@ export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
   
-  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [showPostGig, setShowPostGig] = useState(false);
 
   useEffect(() => {
-    const getUser = async () => {
+    const getProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        router.push('/login'); // Kalau belum login, tendang ke login
+        router.push('/login');
         return;
       }
 
-      // Ambil data profile tambahan (kalau ada tabel profiles)
-      // Untuk sekarang kita pake metadata dari Google dulu
-      setUser({
-        name: user.user_metadata.full_name || "User Jasurd",
-        email: user.email,
-        avatar: user.user_metadata.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurd",
-        level: "Newbie",
-        saldo: 0 // Nanti ambil dari tabel profiles
-      });
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+      } else {
+        setProfile(data);
+      }
+      
       setLoading(false);
     };
 
-    getUser();
+    getProfile();
   }, [router, supabase]);
 
   const handleLogout = async () => {
@@ -62,12 +65,12 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-200 rounded-full border-2 border-slate-900 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+              <img src={profile?.avatar_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Jasurd"} alt="Avatar" className="w-full h-full object-cover" />
             </div>
             <div>
-              <h2 className="text-sm md:text-base font-black text-slate-900 leading-tight">{user.name}</h2>
+              <h2 className="text-sm md:text-base font-black text-slate-900 leading-tight">{profile?.full_name}</h2>
               <span className="inline-block bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
-                {user.level}
+                @{profile?.username}
               </span>
             </div>
           </div>
@@ -92,27 +95,11 @@ export default function DashboardPage() {
                 <i className="fa-solid fa-lock"></i> Aman
               </div>
             </div>
-            <h2 className="text-4xl font-black mb-6">Rp {user.saldo.toLocaleString('id-ID')}</h2>
+            <h2 className="text-4xl font-black mb-6">Rp {profile?.saldo?.toLocaleString('id-ID') || 0}</h2>
             <div className="flex gap-3">
               <button onClick={() => alert('Top Up Segera Hadir!')} className="flex-1 bg-white/10 hover:bg-white/20 text-white py-3 rounded-xl text-sm font-bold border border-white/20 transition active:scale-95">Top Up</button>
               <button onClick={() => setShowWithdraw(true)} className="flex-1 bg-white text-slate-900 py-3 rounded-xl text-sm font-bold border-2 border-transparent hover:border-slate-200 transition active:scale-95 shadow-sm">Tarik Dana</button>
             </div>
-          </div>
-        </div>
-
-        {/* Statistik Ringkas */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white p-3 rounded-2xl border-2 border-slate-200 text-center flex flex-col justify-center min-h-[90px]">
-            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Cuan</p>
-            <p className="text-sm font-black text-green-600 truncate">Rp 0</p>
-          </div>
-          <div className="bg-white p-3 rounded-2xl border-2 border-slate-200 text-center flex flex-col justify-center min-h-[90px]">
-            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Misi Beres</p>
-            <p className="text-xl font-black text-slate-900">0</p>
-          </div>
-          <div className="bg-white p-3 rounded-2xl border-2 border-slate-200 text-center flex flex-col justify-center min-h-[90px]">
-            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Rating</p>
-            <p className="text-xl font-black text-slate-900 flex items-center justify-center gap-1">5.0 <i className="fa-solid fa-star text-yellow-400 text-xs"></i></p>
           </div>
         </div>
 
@@ -128,29 +115,18 @@ export default function DashboardPage() {
           <i className="fa-solid fa-chevron-right text-slate-900"></i>
         </button>
 
-        {/* Active Orders */}
-        <div>
-          <h3 className="font-black text-slate-900 mb-4 pl-1 text-lg flex justify-between items-center">
-            Jadwal Misi 📅
-            <span className="text-xs font-bold text-primary cursor-pointer hover:underline">Riwayat</span>
-          </h3>
-          <div className="text-center p-8 bg-white rounded-3xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center min-h-[150px]">
-            <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 text-xl mb-3"><i className="fa-regular fa-calendar-xmark"></i></div>
-            <p className="text-slate-500 text-xs font-bold mb-2">Belum ada orderan aktif.</p>
-            <button onClick={() => setShowPostGig(true)} className="text-primary text-xs font-black underline">Promosiin Jasa Lo Dulu!</button>
-          </div>
-        </div>
-
         {/* Menu Grid */}
         <div className="grid grid-cols-2 gap-3">
-           <Link href={`/u/${user.email?.split('@')[0]}`} className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-900 transition flex items-center gap-3 group">
+           <Link href={`/u/${profile?.username}`} className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-900 transition flex items-center gap-3 group">
               <i className="fa-regular fa-eye text-slate-400 group-hover:text-slate-900"></i>
               <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Lihat Profil Publik</span>
            </Link>
-           <button className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-900 transition flex items-center gap-3 group text-left">
+           
+           {/* FIX: Tombol ini sekarang pake Link ke /dashboard/edit */}
+           <Link href="/dashboard/edit" className="bg-white p-4 rounded-2xl border-2 border-slate-200 hover:border-slate-900 transition flex items-center gap-3 group text-left">
               <i className="fa-solid fa-gear text-slate-400 group-hover:text-slate-900"></i>
-              <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Pengaturan Akun</span>
-           </button>
+              <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">Edit Profil</span>
+           </Link>
         </div>
 
       </div>
