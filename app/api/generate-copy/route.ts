@@ -1,7 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 
-// Inisialisasi Gemini
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "");
 
 export async function POST(request: Request) {
@@ -9,32 +8,41 @@ export async function POST(request: Request) {
     const { title, vibe, type } = await request.json();
 
     if (!process.env.GOOGLE_AI_API_KEY) {
-      return NextResponse.json({ error: "API Key belum diset" }, { status: 500 });
+      return NextResponse.json({ error: "API Key belum diset di server" }, { status: 500 });
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    // Prompt Engineering (Dukun Mode)
-    let prompt = "";
-    if (type === 'solver') {
-      prompt = `Buatkan judul yang menarik (maksimal 10 kata) dan deskripsi jasa yang menjual (maksimal 3 kalimat) untuk jasa: "${title}".
-      Gaya bahasa: ${vibe} (Savage = gaul, berani, sedikit kasar tapi lucu. Profesional = formal, meyakinkan. Empati = lembut, pengertian).
-      Format output JSON: { "title": "...", "description": "..." }`;
-    } else {
-      prompt = `Buatkan judul request bantuan yang mendesak (maksimal 10 kata) dan deskripsi kebutuhan (maksimal 3 kalimat) untuk: "${title}".
-      Gaya bahasa: ${vibe}.
-      Format output JSON: { "title": "...", "description": "..." }`;
-    }
+    const prompt = `
+      Act as a creative copywriter.
+      Task: Create a catchy title (max 10 words) and a selling description (max 3 sentences) for a gig/service.
+      Input: "${title}"
+      Tone: ${vibe} (Savage = slang, bold, funny. Profesional = formal, trustworthy. Empati = kind, understanding).
+      Type: ${type} (solver = selling service, seeker = looking for help).
+      
+      IMPORTANT: Return ONLY valid JSON format without markdown code blocks.
+      Example format: { "title": "...", "description": "..." }
+    `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
 
-    // Bersihkan JSON dari markdown ```json ... ```
-    const cleanText = text.replace(/```json|```/g, "").trim();
-    const jsonResponse = JSON.parse(cleanText);
+    // Bersihkan Markdown (```json ... ```)
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
 
-    return NextResponse.json(jsonResponse);
+    // Coba Parse
+    try {
+      const jsonResponse = JSON.parse(text);
+      return NextResponse.json(jsonResponse);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", text);
+      // Fallback kalau AI ngaco formatnya
+      return NextResponse.json({ 
+        title: title, 
+        description: text // Balikin teks mentah aja daripada error
+      });
+    }
 
   } catch (error) {
     console.error("AI Error:", error);
