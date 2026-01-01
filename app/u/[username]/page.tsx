@@ -2,23 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import GigCard from '@/components/ui/GigCard';
 import { createClient } from '@/lib/supabase';
+import { useToast } from '@/components/ui/Toast';
 
 export default function PublicProfilePage() {
   const params = useParams();
+  const router = useRouter();
   const supabase = createClient();
+  const { showToast } = useToast();
   
   const [profile, setProfile] = useState<any>(null);
   const [gigs, setGigs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'gigs' | 'reviews'>('gigs');
+  const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      // 1. Cari Profile berdasarkan Username
       const { data: userData, error: userError } = await supabase
         .from('profiles')
         .select('*')
@@ -27,12 +29,11 @@ export default function PublicProfilePage() {
 
       if (userError || !userData) {
         setLoading(false);
-        return; // User not found
+        return;
       }
 
       setProfile(userData);
 
-      // 2. Cari Gigs milik user tersebut
       const { data: gigsData } = await supabase
         .from('gigs')
         .select('*')
@@ -46,13 +47,60 @@ export default function PublicProfilePage() {
     fetchData();
   }, [params.username, supabase]);
 
+  const handleStartChat = async () => {
+    setChatLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      showToast("Login dulu buat chat!", "error");
+      router.push('/login');
+      return;
+    }
+
+    if (user.id === profile.id) {
+      showToast("Gak bisa chat diri sendiri, Bos.", "error");
+      setChatLoading(false);
+      return;
+    }
+
+    // Urutkan ID biar konsisten (user1 < user2)
+    const user1 = user.id < profile.id ? user.id : profile.id;
+    const user2 = user.id < profile.id ? profile.id : user.id;
+
+    // 1. Cek apakah room udah ada
+    const { data: existingRoom } = await supabase
+      .from('conversations')
+      .select('id')
+      .eq('user1_id', user1)
+      .eq('user2_id', user2)
+      .single();
+
+    if (existingRoom) {
+      router.push(`/inbox/${existingRoom.id}`);
+      return;
+    }
+
+    // 2. Kalau belum, bikin baru
+    const { data: newRoom, error } = await supabase
+      .from('conversations')
+      .insert({ user1_id: user1, user2_id: user2, last_message: 'New Chat' })
+      .select()
+      .single();
+
+    if (error) {
+      showToast("Gagal bikin room chat.", "error");
+    } else {
+      router.push(`/inbox/${newRoom.id}`);
+    }
+    setChatLoading(false);
+  };
+
   if (loading) return <div className="min-h-screen bg-surface flex items-center justify-center">Loading...</div>;
   if (!profile) return <div className="min-h-screen bg-surface flex items-center justify-center font-bold text-slate-500">User gak ketemu, Bos.</div>;
 
-  // Mock Reviews (Sementara)
+  // Mock Reviews
   const reviews = [
-    { id: 1, user: "Siska", text: "Joki antrinya gercep parah! Dapet tiket VIP sesuai request.", rating: 5, date: "2 hari lalu" },
-    { id: 2, user: "Doni", text: "Enak diajak ngobrol, pendengar yang baik.", rating: 4, date: "1 minggu lalu" }
+    { id: 1, user: "Siska", text: "Joki antrinya gercep parah!", rating: 5, date: "2 hari lalu" },
   ];
 
   return (
@@ -63,10 +111,7 @@ export default function PublicProfilePage() {
         <Link href="/lounge" className="w-10 h-10 bg-white/90 backdrop-blur border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 shadow-hard btn-brutal pointer-events-auto">
           <i className="fa-solid fa-arrow-left"></i>
         </Link>
-        <button 
-          onClick={() => alert('Link Profile Disalin!')}
-          className="w-10 h-10 bg-white/90 backdrop-blur border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 shadow-hard btn-brutal pointer-events-auto"
-        >
+        <button onClick={() => alert('Link Profile Disalin!')} className="w-10 h-10 bg-white/90 backdrop-blur border-2 border-slate-900 rounded-full flex items-center justify-center text-slate-900 shadow-hard btn-brutal pointer-events-auto">
           <i className="fa-solid fa-share-nodes"></i>
         </button>
       </div>
@@ -113,7 +158,7 @@ export default function PublicProfilePage() {
                 <GigCard 
                   key={gig.id} 
                   id={gig.id}
-                  slug={gig.slug} // FIX: Tambahkan prop slug di sini
+                  slug={gig.slug}
                   title={gig.title}
                   price={new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(gig.price)}
                   image={gig.image_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80"}
@@ -131,16 +176,10 @@ export default function PublicProfilePage() {
                 <div key={review.id} className="bg-white border-2 border-slate-100 rounded-xl p-4">
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-slate-200 rounded-full overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user}`} alt="User" />
-                      </div>
+                      <div className="w-6 h-6 bg-slate-200 rounded-full overflow-hidden"><img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${review.user}`} alt="User" /></div>
                       <span className="text-xs font-bold text-slate-900">@{review.user}</span>
                     </div>
                     <span className="text-[10px] text-slate-400">{review.date}</span>
-                  </div>
-                  <div className="text-yellow-400 text-[10px] mb-2">
-                    {[...Array(review.rating)].map((_, i) => <i key={i} className="fa-solid fa-star"></i>)}
                   </div>
                   <p className="text-xs text-slate-600 font-medium leading-relaxed">"{review.text}"</p>
                 </div>
@@ -148,6 +187,17 @@ export default function PublicProfilePage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Sticky Hire Button (Mobile Only) */}
+      <div className="fixed bottom-0 left-0 w-full bg-white border-t-2 border-slate-900 p-4 z-40 md:hidden">
+        <button 
+          onClick={handleStartChat}
+          disabled={chatLoading}
+          className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold shadow-hard border-2 border-slate-900 text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition disabled:opacity-70"
+        >
+          {chatLoading ? <i className="fa-solid fa-spinner fa-spin"></i> : <>Chat & Hire <i className="fa-regular fa-paper-plane"></i></>}
+        </button>
       </div>
 
     </div>
