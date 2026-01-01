@@ -1,55 +1,56 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { Metadata } from 'next';
+import { useParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 
-// Helper buat Server Component
-const createClient = async () => {
-  const cookieStore = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-};
-
-// 1. GENERATE METADATA
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const supabase = await createClient();
-  const { data: article } = await supabase
-    .from('articles')
-    .select('title, summary, image_url')
-    .eq('slug', params.slug)
-    .single();
-
-  if (!article) return { title: 'Artikel Tidak Ditemukan' };
-
-  return {
-    title: `${article.title} | Insight JASURD`,
-    description: article.summary,
-    openGraph: {
-      title: article.title,
-      description: article.summary,
-      images: [{ url: article.image_url || '', width: 1200, height: 630 }],
-    },
-  };
-}
-
-// 2. HALAMAN UTAMA
-export default async function ArticleDetailPage({ params }: { params: { slug: string } }) {
-  const supabase = await createClient();
+export default function ArticleDetailPage() {
+  const params = useParams();
+  const supabase = createClient();
   
-  const { data: article } = await supabase
-    .from('articles')
-    .select('*')
-    .eq('slug', params.slug)
-    .single();
+  const [article, setArticle] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      // Decode slug dari URL
+      const slug = decodeURIComponent(params.slug as string);
+      
+      const { data, error } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (error) {
+        console.error("Error fetching article:", error);
+      } else {
+        setArticle(data);
+      }
+      setLoading(false);
+    };
+
+    if (params.slug) fetchArticle();
+  }, [params.slug, supabase]);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link disalin!');
+    }
+  };
+
+  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><i className="fa-solid fa-spinner fa-spin text-3xl text-slate-900"></i></div>;
 
   if (!article) {
     return (
@@ -83,7 +84,7 @@ export default async function ArticleDetailPage({ params }: { params: { slug: st
         <article className="prose prose-slate prose-lg max-w-none font-medium text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
         <div className="mt-12 pt-8 border-t-2 border-slate-100 flex justify-between items-center">
           <p className="text-sm font-bold text-slate-500">Suka artikel ini?</p>
-          <a href={`https://wa.me/?text=Cek artikel ini: https://jasurd.com/insight/${params.slug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary transition shadow-hard border-2 border-slate-900 active:translate-y-0.5 active:shadow-none"><i className="fa-brands fa-whatsapp"></i> Share WA</a>
+          <button onClick={handleShare} className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary transition shadow-hard border-2 border-slate-900 active:translate-y-0.5 active:shadow-none"><i className="fa-solid fa-share-nodes"></i> Share</button>
         </div>
       </div>
     </div>
