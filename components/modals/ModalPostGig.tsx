@@ -17,6 +17,7 @@ export default function ModalPostGig({ onClose }: ModalPostGigProps) {
 
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [vibe, setVibe] = useState<'savage' | 'profesional' | 'empati'>('savage');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -38,25 +39,42 @@ export default function ModalPostGig({ onClose }: ModalPostGigProps) {
     return `${cleanTitle}-${cleanCity}-${randomString}`;
   };
 
-  const generateMagicText = () => {
-    if (!keyword) return showToast("Isi kata kuncinya dulu, Bos!", "error");
+  const generateMagicText = async () => {
+    // Ambil keyword dari input judul user
+    const userKeyword = formData.title; 
+    
+    if (!userKeyword) return showToast("Isi judul jasa dulu, Bos!", "error");
+    
     setIsGenerating(true);
-    setTimeout(() => {
-      if (formData.type === 'solver') {
-        setFormData(prev => ({
-          ...prev,
-          title: `Jasa ${keyword} Anti Ribet (Lo Tau Beres)`,
-          description: `Masih jaman ${keyword} sendiri? Capek, Bos! Mending gue yang kerjain. Skill gue di atas rata-rata, mental baja, dan pastinya lebih gercep dari harapan orang tua lo. Gas order sekarang sebelum gue sibuk!`
-        }));
+    
+    try {
+      const response = await fetch('/api/generate-copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: userKeyword,
+          vibe: vibe, // Pastikan state 'vibe' ada
+          type: formData.type
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        showToast(data.error, "error");
       } else {
         setFormData(prev => ({
           ...prev,
-          title: `Butuh Bantuan ${keyword} (Urgent!)`,
-          description: `Gue lagi butuh banget orang buat ${keyword}. Syaratnya cuma jujur, gercep, dan gak baperan. Budget bisa nego tipis. Tolongin gue plis!`
+          title: data.title,
+          description: data.description
         }));
+        showToast("Mantra berhasil! ✨", "success");
       }
+    } catch (error) {
+      showToast("Dukunnya lagi sibuk (Error).", "error");
+    } finally {
       setIsGenerating(false);
-    }, 1000);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
