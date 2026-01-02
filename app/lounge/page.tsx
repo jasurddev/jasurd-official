@@ -10,7 +10,11 @@ export default function LoungePage() {
   const [gigs, setGigs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // LOGIC HIDE ON SCROLL
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Hide Header Logic
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -28,10 +32,12 @@ export default function LoungePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Fetch Data (With Search & Filter)
   useEffect(() => {
     const fetchGigs = async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      
+      let query = supabase
         .from('gigs')
         .select(`
           *,
@@ -46,6 +52,18 @@ export default function LoungePage() {
         .eq('type', activeTab)
         .order('created_at', { ascending: false });
 
+      // Filter Search
+      if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
+      }
+
+      // Filter Category
+      if (selectedCategory !== 'All') {
+        query = query.eq('category', selectedCategory);
+      }
+
+      const { data, error } = await query;
+
       if (error) {
         console.error('Error fetching gigs:', error);
       } else {
@@ -54,12 +72,17 @@ export default function LoungePage() {
       setLoading(false);
     };
 
-    fetchGigs();
-  }, [supabase, activeTab]);
+    // Debounce Search (Tunggu 500ms setelah ngetik baru fetch)
+    const timeoutId = setTimeout(() => {
+      fetchGigs();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [supabase, activeTab, searchQuery, selectedCategory]);
 
   const formattedGigs = gigs.map(gig => ({
     id: gig.id,
-    slug: gig.slug, // Pass Slug
+    slug: gig.slug,
     title: gig.title,
     price: new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(gig.price) + (gig.unit !== 'flat' ? `/${gig.unit}` : ''),
     image: gig.image_url || "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=400&q=80",
@@ -79,6 +102,8 @@ export default function LoungePage() {
     if (activeTab === tab) return `${base} bg-slate-900 text-white shadow-sm`;
     return `${base} text-slate-500 hover:text-slate-900`;
   };
+
+  const categories = ['All', 'Jastip', 'Social', 'Digital', 'Absurd'];
 
   return (
     <div className="min-h-screen bg-pattern pb-24 pt-16 md:pt-20">
@@ -106,15 +131,32 @@ export default function LoungePage() {
             <div className="absolute inset-0 bg-slate-900 rounded-xl translate-y-0.5 translate-x-0.5 transition-transform group-hover:translate-x-1 group-hover:translate-y-1"></div>
             <div className="relative flex bg-white border-2 border-slate-900 rounded-xl p-1 items-center shadow-sm">
               <i className="fa-solid fa-magnifying-glass text-slate-400 ml-3 text-sm"></i>
-              <input type="text" placeholder={activeTab === 'solver' ? "Cari jasa..." : "Cari bantuan..."} className="w-full px-2 py-1.5 bg-transparent outline-none text-slate-900 placeholder-slate-400 font-bold text-xs md:text-sm" />
-              <button className="bg-accent text-slate-900 px-3 py-1.5 rounded-lg font-black hover:bg-accent-hover transition border-2 border-slate-900 text-[10px] uppercase tracking-wide">Cari</button>
+              <input 
+                type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={activeTab === 'solver' ? "Cari jasa..." : "Cari bantuan..."} 
+                className="w-full px-2 py-1.5 bg-transparent outline-none text-slate-900 placeholder-slate-400 font-bold text-xs md:text-sm" 
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="mr-2 text-slate-400 hover:text-red-500">
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              )}
             </div>
           </div>
 
           <div className="flex overflow-x-auto no-scrollbar gap-1.5 pb-1">
-             {['#Jastip', '#TemanCurhat', '#JokiAntri', '#SurpriseUltah', '#Gaming', '#Absurd'].map((tag) => (
-               <span key={tag} className="flex-shrink-0 px-2 py-1 bg-surface border-2 border-slate-200 text-slate-600 rounded-md text-[10px] font-bold hover:border-slate-900 hover:text-slate-900 cursor-pointer transition select-none flex items-center gap-1">
-                 {tag.replace('#', '')}
+             {categories.map((cat) => (
+               <span 
+                 key={cat} 
+                 onClick={() => setSelectedCategory(cat)}
+                 className={`
+                   flex-shrink-0 px-2 py-1 border-2 rounded-md text-[10px] font-bold cursor-pointer transition select-none flex items-center gap-1
+                   ${selectedCategory === cat ? 'bg-slate-900 text-white border-slate-900' : 'bg-surface border-slate-200 text-slate-600 hover:border-slate-900 hover:text-slate-900'}
+                 `}
+               >
+                 {cat === 'All' ? 'Semua' : `#${cat}`}
                </span>
              ))}
           </div>
@@ -125,13 +167,15 @@ export default function LoungePage() {
         {loading ? (
           <div className="text-center py-20"><i className="fa-solid fa-spinner fa-spin text-3xl text-slate-300"></i></div>
         ) : formattedGigs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
             {formattedGigs.map((gig) => (
               <GigCard key={gig.id} {...gig} />
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 text-slate-400 font-bold">Belum ada jasa nih. Jadilah yang pertama!</div>
+          <div className="text-center py-20 text-slate-400 font-bold">
+            {searchQuery ? `Gak nemu "${searchQuery}" nih.` : "Belum ada jasa di kategori ini."}
+          </div>
         )}
       </div>
 

@@ -51,13 +51,31 @@ export default function ManageArticles() {
                     {article.is_published ? 'Published' : 'Draft'}
                   </span>
                 </td>
-                <td className="p-4 flex gap-2">
-                  <button onClick={() => handleDelete(article.id)} className="text-red-500 hover:underline text-sm font-bold">Hapus</button>
+                <td className="p-4 flex gap-4 items-center">
+                  {/* TOMBOL EDIT */}
+                  <Link 
+                    href={`/dashboard/admin/articles/${article.id}/edit`} 
+                    className="text-blue-600 hover:text-blue-800 text-sm font-bold flex items-center gap-1"
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i> Edit
+                  </Link>
+                  
+                  {/* TOMBOL HAPUS */}
+                  <button 
+                    onClick={() => handleDelete(article.id)} 
+                    className="text-red-500 hover:text-red-700 text-sm font-bold flex items-center gap-1"
+                  >
+                    <i className="fa-solid fa-trash"></i> Hapus
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        
+        {articles.length === 0 && (
+          <div className="p-8 text-center text-slate-400 font-bold">Belum ada artikel.</div>
+        )}
       </div>
     </div>
   );
