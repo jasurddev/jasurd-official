@@ -11,11 +11,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "API Key belum diset di server" }, { status: 500 });
     }
 
-    // FIX: Ganti model ke 'gemini-1.5-flash' (Lebih baru, cepat, & support JSON mode)
+    // UPDATE: Pake 'gemini-2.0-flash' yang stabil di 2026
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash", 
       generationConfig: {
-        responseMimeType: "application/json" // Paksa output JSON
+        responseMimeType: "application/json"
       }
     });
 
@@ -31,6 +31,33 @@ export async function POST(request: Request) {
     `;
 
     const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+
+    try {
+      const jsonResponse = JSON.parse(text);
+      return NextResponse.json(jsonResponse);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", text);
+      return NextResponse.json({ 
+        title: title, 
+        description: text 
+      });
+    }
+
+  } catch (error: any) {
+    console.error("AI Error:", error);
+    
+    // Fallback kalau model 2.0 pun bermasalah (jarang terjadi)
+    // Kita balikin teks standar biar aplikasi gak crash di user
+    return NextResponse.json({ 
+      title: title,
+      description: "Deskripsi gagal digenerate AI. Silakan tulis manual ya, Bos!"
+    });
+  }
+}
+
+  const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
