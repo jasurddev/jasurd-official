@@ -11,75 +11,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "API Key belum diset di server" }, { status: 500 });
     }
 
-    // UPDATE: Pake 'gemini-2.0-flash' yang stabil di 2026
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash", 
-      generationConfig: {
-        responseMimeType: "application/json"
-      }
-    });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"  });
 
     const prompt = `
-      Act as a creative copywriter for a gig marketplace called Jasurd (Jasa Absurd).
-      Task: Create a catchy title (max 10 words) and a selling description (max 3 sentences).
-      
+      Act as a creative copywriter.
+      Task: Create a catchy title (max 10 words) and a selling description (max 3 sentences) for a gig/service.
       Input: "${title}"
       Tone: ${vibe} (Savage = slang, bold, funny. Profesional = formal, trustworthy. Empati = kind, understanding).
       Type: ${type} (solver = selling service, seeker = looking for help).
       
-      Return JSON with keys: "title" and "description".
+      IMPORTANT: Return ONLY valid JSON format without markdown code blocks.
+      Example format: { "title": "...", "description": "..." }
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
 
+    // Bersihkan Markdown (```json ... ```)
+    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+
+    // Coba Parse
     try {
       const jsonResponse = JSON.parse(text);
       return NextResponse.json(jsonResponse);
     } catch (parseError) {
       console.error("JSON Parse Error:", text);
+      // Fallback kalau AI ngaco formatnya
       return NextResponse.json({ 
         title: title, 
-        description: text 
+        description: text // Balikin teks mentah aja daripada error
       });
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("AI Error:", error);
-    
-    // Fallback kalau model 2.0 pun bermasalah (jarang terjadi)
-    // Kita balikin teks standar biar aplikasi gak crash di user
-    return NextResponse.json({ 
-      title: title,
-      description: "Deskripsi gagal digenerate AI. Silakan tulis manual ya, Bos!"
-    });
-  }
-}
-
-  const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    // Karena udah pake responseMimeType: "application/json", 
-    // kita gak perlu regex replace markdown lagi. Langsung parse aja.
-    try {
-      const jsonResponse = JSON.parse(text);
-      return NextResponse.json(jsonResponse);
-    } catch (parseError) {
-      console.error("JSON Parse Error:", text);
-      return NextResponse.json({ 
-        title: title, 
-        description: text 
-      });
-    }
-
-  } catch (error: any) {
-    console.error("AI Error:", error);
-    // Return pesan error yang lebih jelas buat debugging di frontend
-    return NextResponse.json(
-      { error: error?.message || "Gagal memanggil Dukun AI" }, 
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Gagal memanggil Dukun AI" }, { status: 500 });
   }
 }
