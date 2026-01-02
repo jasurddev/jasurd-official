@@ -102,12 +102,29 @@ export default function PostArticlePage() {
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Kategori</label>
-            <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-white border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-bold outline-none">
+            <select 
+              value={formData.category} 
+              onChange={e => setFormData({...formData, category: e.target.value})} 
+              className="w-full bg-slate-50 border-2 border-slate-200 focus:border-slate-900 rounded-xl px-4 py-3 font-bold outline-none"
+            >
+              <option>Gig Economy</option>
+              <option>Generasi Z</option>
+              <option>Dunia Kerja</option>
+              <option>Ekonomi Sosial</option>
+              <option>Jasa Mikro</option>
+              <option>Kerja Fleksibel</option>
+              <option>Fenomena Sosial</option>
+              <option>Ekonomi Digital</option>
+              <option>Gaya Hidup Urban</option>
+              <option>Perubahan Sosial</option>
+              <option>Isu Ketenagakerjaan</option>
+              <option>Kerja Non-Formal</option>
+              <option>Ekonomi Kreatif</option>
+              <option>Tren Anak Muda</option>
+              <option>Realitas Pekerja</option>
               <option>Tech Hacks</option>
               <option>Success Story</option>
               <option>Safety</option>
-              <option>Guide</option>
-              <option>Skill</option>
             </select>
           </div>
 
