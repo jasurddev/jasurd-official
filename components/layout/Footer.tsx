@@ -3,33 +3,46 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-white py-12 text-center mt-auto border-t-4 border-accent">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
+    <footer className="bg-slate-900 text-white py-12 mt-auto border-t-4 border-accent">
+      <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
         
-        {/* Logo Image (Inverted for Dark Mode) */}
-        <Link href="/" className="mb-6 opacity-90 hover:opacity-100 transition-opacity inline-block relative h-10 w-32">
-            <Image 
-               src="/logodark.svg" 
-               alt="JASURD Logo" 
-               fill
-               className="object-contain filter invert brightness-0 invert" // Trik CSS: Hitam jadi Putih
-            />
-        </Link>
-        
-        <p className="text-slate-400 text-xs max-w-md mx-auto font-medium mb-6 leading-relaxed">
-          Platform gig economy buat lo yang punya skill absurd. <br/>
-          Karena hidup udah susah, nyari duit harusnya mudah.
-        </p>
+        {/* Left: Brand */}
+        <div className="text-center md:text-left">
+          <Link href="/" className="mb-4 opacity-90 hover:opacity-100 transition-opacity inline-block relative h-10 w-32">
+              <Image 
+                 src="/logo.svg" 
+                 alt="JASURD Logo" 
+                 fill
+                 className="object-contain object-left filter invert brightness-0 invert" 
+              />
+          </Link>
+          <p className="text-slate-400 text-xs max-w-xs font-medium leading-relaxed">
+            Platform gig economy buat lo yang punya Waktu & Kemauan. <br/>
+            Karena Hidup Udah Susah, Nyari Duit Harusnya Mudah.
+          </p>
+        </div>
 
-        {/* Footer Links */}
-        <div className="flex gap-6 mb-8 text-sm font-bold text-slate-300">
-          <Link href="/about" className="hover:text-white hover:underline decoration-accent decoration-2 underline-offset-4 transition">Tentang Kami</Link>
-          <Link href="/how-to" className="hover:text-white hover:underline decoration-accent decoration-2 underline-offset-4 transition">Cara Main</Link>
-          <Link href="/insight" className="hover:text-white hover:underline decoration-accent decoration-2 underline-offset-4 transition">Blog</Link>
+        {/* Right: Links */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-12 text-center md:text-right">
+          <div className="flex flex-col gap-3">
+            <h4 className="font-black text-white uppercase text-sm tracking-wider">Menu</h4>
+            <Link href="/lounge" className="text-slate-400 hover:text-white text-sm font-bold transition">Lounge</Link>
+            <Link href="/insight" className="text-slate-400 hover:text-white text-sm font-bold transition">Insight</Link>
+            <Link href="/how-to" className="text-slate-400 hover:text-white text-sm font-bold transition">Cara Main</Link>
+          </div>
+          <div className="flex flex-col gap-3">
+            <h4 className="font-black text-white uppercase text-sm tracking-wider">Company</h4>
+            <Link href="/about" className="text-slate-400 hover:text-white text-sm font-bold transition">Tentang Kami</Link>
+            <a href="#" className="text-slate-400 hover:text-white text-sm font-bold transition">Syarat & Ketentuan</a>
+            <a href="#" className="text-slate-400 hover:text-white text-sm font-bold transition">Kebijakan Privasi</a>
+          </div>
         </div>
         
+      </div>
+      
+      <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-slate-800 text-center md:text-left">
         <p className="text-slate-600 text-[10px] font-medium">
-          © {new Date().getFullYear()} PT Studio Satu Akun. Made with ☕ & 😭.
+          © {new Date().getFullYear()} PT Studio Satu Akun.
         </p>
       </div>
     </footer>

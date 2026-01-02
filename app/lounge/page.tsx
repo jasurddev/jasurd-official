@@ -125,7 +125,7 @@ export default function LoungePage() {
         {loading ? (
           <div className="text-center py-20"><i className="fa-solid fa-spinner fa-spin text-3xl text-slate-300"></i></div>
         ) : formattedGigs.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {formattedGigs.map((gig) => (
               <GigCard key={gig.id} {...gig} />
             ))}
