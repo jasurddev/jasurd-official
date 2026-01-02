@@ -1,12 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const Footer = () => {
   return (
     <footer className="bg-slate-900 text-white py-12 text-center mt-auto border-t-4 border-accent">
       <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
-        {/* Logo Placeholder */}
-        <Link href="/" className="mb-4 opacity-90 hover:opacity-100 transition-opacity inline-block">
-            <span className="font-black text-2xl tracking-tighter italic text-white">JASURD<span className="text-accent">.</span></span>
+        
+        {/* Logo Image (Inverted for Dark Mode) */}
+        <Link href="/" className="mb-6 opacity-90 hover:opacity-100 transition-opacity inline-block relative h-10 w-32">
+            <Image 
+               src="/logodark.svg" 
+               alt="JASURD Logo" 
+               fill
+               className="object-contain filter invert brightness-0 invert" // Trik CSS: Hitam jadi Putih
+            />
         </Link>
         
         <p className="text-slate-400 text-xs max-w-md mx-auto font-medium mb-6 leading-relaxed">
@@ -22,7 +29,7 @@ const Footer = () => {
         </div>
         
         <p className="text-slate-600 text-[10px] font-medium">
-          © {new Date().getFullYear()} PT Studio Satu Akun.
+          © {new Date().getFullYear()} PT Studio Satu Akun. Made with ☕ & 😭.
         </p>
       </div>
     </footer>
