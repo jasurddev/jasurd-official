@@ -9,12 +9,9 @@ const BottomNavMobile = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // Logic Hide on Scroll
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
-      // Kalau scroll ke bawah > 50px, sembunyikan
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
         setIsVisible(false);
       } else {
@@ -22,16 +19,12 @@ const BottomNavMobile = () => {
       }
       setLastScrollY(currentScrollY);
     };
-
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Logic Hide on Specific Pages (Chat Room, Login, Register)
-  // Kalau lagi di halaman chat detail (/inbox/123), sembunyikan total
   const isHiddenPage = pathname.startsWith('/inbox/') && pathname !== '/inbox' || pathname === '/login' || pathname === '/register';
-
-  if (isHiddenPage) return null; // Jangan render sama sekali
+  if (isHiddenPage) return null;
 
   const isActive = (path: string) => {
     if (path === '/') return pathname === '/';
@@ -42,55 +35,58 @@ const BottomNavMobile = () => {
     <nav 
       id="mobile-bottom-nav" 
       className={`
-        fixed left-1/2 -translate-x-1/2 bg-white border-2 border-slate-900 shadow-hard rounded-2xl z-[90] h-14 flex items-center gap-1 px-2 transition-all duration-300 md:hidden w-[90%] max-w-[350px]
-        ${isVisible ? 'bottom-4' : '-bottom-24'}
+        fixed left-1/2 -translate-x-1/2 bg-white border-2 border-slate-900 shadow-hard rounded-2xl z-[90] 
+        h-16 flex items-center justify-between px-4 transition-all duration-300 md:hidden w-[90%] max-w-[350px]
+        ${isVisible ? 'bottom-6' : '-bottom-24'}
       `}
     >
       
       {/* Home */}
       <Link 
         href="/" 
-        className={`flex-1 flex flex-col items-center justify-center h-full transition cursor-pointer rounded-xl hover:bg-slate-50 active:scale-90 ${isActive('/') ? 'text-primary' : 'text-slate-400'}`}
+        className={`flex flex-col items-center justify-center w-12 h-full transition active:scale-90 ${isActive('/') ? 'text-primary' : 'text-slate-400'}`}
       >
-        <i className="fa-solid fa-house text-base mb-0.5"></i>
-        <span className="text-[8px] font-bold">Home</span>
+        <i className="fa-solid fa-house text-lg mb-0.5"></i>
+        <span className="text-[9px] font-bold">Home</span>
       </Link>
 
       {/* Insight */}
       <Link 
         href="/insight" 
-        className={`flex-1 flex flex-col items-center justify-center h-full transition cursor-pointer rounded-xl hover:bg-slate-50 active:scale-90 ${isActive('/insight') ? 'text-primary' : 'text-slate-400'}`}
+        className={`flex flex-col items-center justify-center w-12 h-full transition active:scale-90 ${isActive('/insight') ? 'text-primary' : 'text-slate-400'}`}
       >
-        <i className="fa-regular fa-lightbulb text-base mb-0.5"></i>
-        <span className="text-[8px] font-bold">Insight</span>
+        <i className="fa-regular fa-lightbulb text-lg mb-0.5"></i>
+        <span className="text-[9px] font-bold">Insight</span>
       </Link>
 
-      {/* Center Button (Lounge) */}
-      <Link 
-        href="/lounge" 
-        className="w-10 h-10 bg-slate-900 rounded-xl text-white shadow-md flex items-center justify-center text-lg active:scale-90 transition -mt-6 border-2 border-slate-900 hover:bg-primary hover:border-primary"
-        aria-label="Lounge Marketplace"
-      >
-        <i className="fa-solid fa-store"></i>
-      </Link>
+      {/* Center Button (Lounge) - Floating */}
+      <div className="relative -top-5">
+        <Link 
+          href="/lounge" 
+          className="w-14 h-14 bg-slate-900 rounded-full text-white shadow-hard border-2 border-white flex items-center justify-center text-xl active:scale-90 transition hover:bg-primary"
+          aria-label="Lounge Marketplace"
+        >
+          <i className="fa-solid fa-store"></i>
+        </Link>
+      </div>
 
       {/* Inbox */}
       <Link 
         href="/inbox" 
-        className={`flex-1 flex flex-col items-center justify-center h-full transition cursor-pointer rounded-xl hover:bg-slate-50 active:scale-90 relative ${isActive('/inbox') ? 'text-primary' : 'text-slate-400'}`}
+        className={`flex flex-col items-center justify-center w-12 h-full transition active:scale-90 relative ${isActive('/inbox') ? 'text-primary' : 'text-slate-400'}`}
       >
-        <i className="fa-regular fa-comment-dots text-base mb-0.5"></i>
-        <span className="text-[8px] font-bold">Inbox</span>
-        <span className="absolute top-2 right-3 w-1.5 h-1.5 bg-red-500 rounded-full border border-white"></span>
+        <i className="fa-regular fa-comment-dots text-lg mb-0.5"></i>
+        <span className="text-[9px] font-bold">Inbox</span>
+        <span className="absolute top-3 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
       </Link>
 
       {/* Akun */}
       <Link 
         href="/dashboard" 
-        className={`flex-1 flex flex-col items-center justify-center h-full transition cursor-pointer rounded-xl hover:bg-slate-50 active:scale-90 ${isActive('/dashboard') ? 'text-primary' : 'text-slate-400'}`}
+        className={`flex flex-col items-center justify-center w-12 h-full transition active:scale-90 ${isActive('/dashboard') ? 'text-primary' : 'text-slate-400'}`}
       >
-        <i className="fa-regular fa-user text-base mb-0.5"></i>
-        <span className="text-[8px] font-bold">Akun</span>
+        <i className="fa-regular fa-user text-lg mb-0.5"></i>
+        <span className="text-[9px] font-bold">Akun</span>
       </Link>
 
     </nav>
