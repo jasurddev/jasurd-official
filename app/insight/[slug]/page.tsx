@@ -1,56 +1,60 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { Metadata } from 'next';
+import InsightCard from '@/components/home/InsightCard'; // Reuse Card
 
-export default function ArticleDetailPage() {
-  const params = useParams();
-  const supabase = createClient();
-  
-  const [article, setArticle] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchArticle = async () => {
-      // Decode slug dari URL
-      const slug = decodeURIComponent(params.slug as string);
-      
-      const { data, error } = await supabase
-        .from('articles')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-      if (error) {
-        console.error("Error fetching article:", error);
-      } else {
-        setArticle(data);
-      }
-      setLoading(false);
-    };
-
-    if (params.slug) fetchArticle();
-  }, [params.slug, supabase]);
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: article.title,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log('Error sharing:', error);
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link disalin!');
+const createClient = async () => {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+      },
     }
-  };
+  );
+};
 
-  if (loading) return <div className="min-h-screen bg-white flex items-center justify-center"><i className="fa-solid fa-spinner fa-spin text-3xl text-slate-900"></i></div>;
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
+  
+  const supabase = await createClient();
+  const { data: article } = await supabase
+    .from('articles')
+    .select('title, summary, image_url')
+    .eq('slug', decodedSlug)
+    .single();
+
+  if (!article) return { title: 'Artikel Tidak Ditemukan' };
+
+  return {
+    title: `${article.title} | Insight JASURD`,
+    description: article.summary,
+    openGraph: {
+      title: article.title,
+      description: article.summary,
+      images: [{ url: article.image_url || '', width: 1200, height: 630 }],
+    },
+  };
+}
+
+export default async function ArticleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
+  
+  const supabase = await createClient();
+  
+  // 1. Fetch Artikel Utama
+  const { data: article } = await supabase
+    .from('articles')
+    .select('*')
+    .eq('slug', decodedSlug)
+    .single();
 
   if (!article) {
     return (
@@ -62,8 +66,18 @@ export default function ArticleDetailPage() {
     );
   }
 
+  // 2. Fetch Related Articles (Ambil 3 artikel lain secara acak/terbaru)
+  const { data: relatedArticles } = await supabase
+    .from('articles')
+    .select('*')
+    .neq('id', article.id) // Jangan ambil artikel yang sama
+    .eq('is_published', true)
+    .limit(3);
+
   return (
     <div className="min-h-screen bg-white pb-24">
+      
+      {/* Hero Image */}
       <div className="h-64 md:h-96 relative w-full">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
@@ -80,13 +94,38 @@ export default function ArticleDetailPage() {
         </div>
       </div>
 
+      {/* Content */}
       <div className="max-w-3xl mx-auto px-6 py-10">
         <article className="prose prose-slate prose-lg max-w-none font-medium text-slate-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: article.content }} />
+        
         <div className="mt-12 pt-8 border-t-2 border-slate-100 flex justify-between items-center">
           <p className="text-sm font-bold text-slate-500">Suka artikel ini?</p>
-          <button onClick={handleShare} className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary transition shadow-hard border-2 border-slate-900 active:translate-y-0.5 active:shadow-none"><i className="fa-solid fa-share-nodes"></i> Share</button>
+          <a href={`https://wa.me/?text=Cek artikel ini: https://jasurd.com/insight/${decodedSlug}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-primary transition shadow-hard border-2 border-slate-900 active:translate-y-0.5 active:shadow-none"><i className="fa-brands fa-whatsapp"></i> Share WA</a>
         </div>
       </div>
+
+      {/* RELATED ARTICLES (BACA JUGA) */}
+      {relatedArticles && relatedArticles.length > 0 && (
+        <div className="bg-slate-50 py-12 border-t-2 border-slate-900">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <h3 className="text-2xl font-black text-slate-900 mb-6">Baca Juga Nih 👇</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {relatedArticles.map((item) => (
+                <InsightCard 
+                  key={item.id}
+                  id={item.slug}
+                  title={item.title}
+                  category={item.category}
+                  summary={item.summary}
+                  image={item.image_url}
+                  color="bg-white"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
