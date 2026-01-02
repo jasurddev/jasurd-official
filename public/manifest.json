@@ -1,0 +1,16 @@
+{
+  "name": "JASURD",
+  "short_name": "JASURD",
+  "description": "Marketplace Jasa Unik & Anti Mainstream Indonesia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/FavDark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
