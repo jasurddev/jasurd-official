@@ -22,7 +22,7 @@ const Footer = () => {
         </div>
         
         <p className="text-slate-600 text-[10px] font-medium">
-          © {new Date().getFullYear()} PT Studio Satu Akun. Made with ☕ & 😭.
+          © {new Date().getFullYear()} PT Studio Satu Akun.
         </p>
       </div>
     </footer>
