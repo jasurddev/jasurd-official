@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
+import FooterWrapper from "@/components/layout/FooterWrapper"; // Import Wrapper
 import BottomNavMobile from "@/components/layout/BottomNavMobile";
 import { ToastProvider } from "@/components/ui/Toast";
-import InstallPrompt from "@/components/ui/InstallPrompt"; // Import PWA Prompt
+import InstallPrompt from "@/components/ui/InstallPrompt";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -61,10 +61,10 @@ export default function RootLayout({
             {children}
           </main>
 
-          <Footer />
-          <BottomNavMobile />
+          {/* Footer Wrapper (Hidden on Chat/Login) */}
+          <FooterWrapper />
           
-          {/* PWA Install Prompt (Muncul di HP) */}
+          <BottomNavMobile />
           <InstallPrompt />
           
         </ToastProvider>
