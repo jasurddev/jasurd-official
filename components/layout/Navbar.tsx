@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import NotificationDropdown from './NotificationDropdown';
 
 const Navbar = () => {
   const supabase = createClient();
@@ -73,13 +74,10 @@ const Navbar = () => {
             <>
               <Link href="/inbox" className="hidden md:flex w-10 h-10 items-center justify-center bg-white border-2 border-slate-900 rounded-lg shadow-hard-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition relative" title="Inbox">
                 <i className="fa-regular fa-comment-dots text-lg"></i>
-                {/* Dot Merah (Nanti bisa dibikin dinamis) */}
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
               </Link>
 
-              <button className="hidden md:flex w-10 h-10 items-center justify-center bg-white border-2 border-slate-900 rounded-lg shadow-hard-sm active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition relative" aria-label="Notifications">
-                <i className="fa-regular fa-bell text-lg"></i>
-              </button>
+              {/* Notification Dropdown (Realtime) */}
+              <NotificationDropdown />
             </>
           )}
 
