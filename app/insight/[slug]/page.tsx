@@ -107,19 +107,23 @@ export default async function ArticleDetailPage({ params }: { params: Promise<{ 
       {/* RELATED ARTICLES (BACA JUGA) */}
       {relatedArticles && relatedArticles.length > 0 && (
         <div className="bg-slate-50 py-12 border-t-2 border-slate-900">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <h3 className="text-2xl font-black text-slate-900 mb-6">Baca Juga Nih 👇</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="max-w-3xl mx-auto px-6">
+            <h3 className="text-xl font-black text-slate-900 mb-6">Baca Juga Nih 👇</h3>
+            <div className="space-y-4">
               {relatedArticles.map((item) => (
-                <InsightCard 
+                <Link 
                   key={item.id}
-                  id={item.slug}
-                  title={item.title}
-                  category={item.category}
-                  summary={item.summary}
-                  image={item.image_url}
-                  color="bg-white"
-                />
+                  href={`/insight/${item.slug}`}
+                  className="block bg-white p-4 rounded-xl border-2 border-slate-200 hover:border-slate-900 hover:shadow-hard-sm transition group"
+                >
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-[10px] font-bold text-primary uppercase mb-1 block">{item.category}</span>
+                      <h4 className="font-bold text-slate-900 group-hover:underline decoration-2 underline-offset-2">{item.title}</h4>
+                    </div>
+                    <i className="fa-solid fa-arrow-right text-slate-300 group-hover:text-slate-900 transition"></i>
+                  </div>
+                </Link>
               ))}
             </div>
           </div>

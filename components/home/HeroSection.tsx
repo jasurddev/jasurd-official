@@ -56,7 +56,7 @@ const HeroSection = () => {
             href="/lounge" 
             className="w-full sm:w-auto bg-accent text-slate-900 px-6 py-3.5 rounded-xl font-black hover:bg-accent-hover transition border-2 border-slate-900 btn-brutal text-sm md:text-lg uppercase tracking-wide shadow-hard flex items-center justify-center gap-2"
           >
-            Cari Jasa Aneh <i className="fa-solid fa-magnifying-glass"></i>
+            Cari Jasa <i className="fa-solid fa-magnifying-glass"></i>
           </Link>
           
           {/* Tombol Kedua: Jual Jasa (Solver) */}
