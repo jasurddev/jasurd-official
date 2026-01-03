@@ -53,17 +53,20 @@ export default function NotificationDropdown() {
 
   const markAsRead = async () => {
     if (unreadCount === 0) return;
+    
+    // 1. Optimistic Update (Langsung ilangin merahnya di UI)
+    setUnreadCount(0);
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // 2. Update Database di Background
     await supabase
       .from('notifications')
       .update({ is_read: true })
       .eq('user_id', user.id)
       .eq('is_read', false);
-    
-    setUnreadCount(0);
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
   };
 
   return (
