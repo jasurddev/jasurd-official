@@ -29,19 +29,19 @@ export default function NotificationDropdown() {
         setUnreadCount(data.filter(n => !n.is_read).length);
       }
 
-      // Realtime Subscription
+      // Realtime Subscription (Tanpa Filter Server-Side)
       const channel = supabase
         .channel('realtime_notifs')
         .on('postgres_changes', {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${user.id}`
         }, (payload) => {
-          setNotifications(prev => [payload.new, ...prev]);
-          setUnreadCount(prev => prev + 1);
-          // Play Sound (Optional)
-          // new Audio('/notification.mp3').play();
+          // Filter Client-Side: Cuma proses kalau user_id cocok
+          if (payload.new.user_id === user.id) {
+            setNotifications(prev => [payload.new, ...prev]);
+            setUnreadCount(prev => prev + 1);
+          }
         })
         .subscribe();
 
@@ -50,7 +50,7 @@ export default function NotificationDropdown() {
 
     fetchNotifs();
   }, [supabase]);
-
+  
   const markAsRead = async () => {
     if (unreadCount === 0) return;
     
