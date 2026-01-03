@@ -49,25 +49,24 @@ const HeroSection = () => {
           Transaksi aman pake <span className="font-bold text-slate-900 underline decoration-accent decoration-4 underline-offset-2">Escrow</span>, anti tipu-tipu.
         </motion.p>
 
-        {/* DUAL CTA: Pilihan Jelas */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 justify-center items-center w-full px-4">
-          {/* Tombol Utama: Cari Jasa (Seeker) */}
+        {/* DUAL CTA: Sejajar di HP */}
+        <motion.div variants={itemVariants} className="flex flex-row gap-3 justify-center items-center w-full px-2">
+          {/* Tombol Utama */}
           <Link 
             href="/lounge" 
-            className="w-full sm:w-auto bg-accent text-slate-900 px-6 py-3.5 rounded-xl font-black hover:bg-accent-hover transition border-2 border-slate-900 btn-brutal text-sm md:text-lg uppercase tracking-wide shadow-hard flex items-center justify-center gap-2"
+            className="flex-1 md:flex-none md:w-auto bg-accent text-slate-900 px-4 py-3.5 rounded-xl font-black hover:bg-accent-hover transition border-2 border-slate-900 btn-brutal text-xs md:text-lg uppercase tracking-wide shadow-hard flex items-center justify-center gap-2"
           >
             Cari Jasa <i className="fa-solid fa-magnifying-glass"></i>
           </Link>
           
-          {/* Tombol Kedua: Jual Jasa (Solver) */}
+          {/* Tombol Kedua */}
           <Link 
             href="/dashboard" 
-            className="w-full sm:w-auto bg-white text-slate-900 px-6 py-3.5 rounded-xl font-bold hover:bg-slate-50 transition border-2 border-slate-900 shadow-hard-sm hover:shadow-hard text-sm md:text-lg text-center flex items-center justify-center gap-2"
+            className="flex-1 md:flex-none md:w-auto bg-white text-slate-900 px-4 py-3.5 rounded-xl font-bold hover:bg-slate-50 transition border-2 border-slate-900 shadow-hard-sm hover:shadow-hard text-xs md:text-lg text-center flex items-center justify-center gap-2"
           >
-            Tawarin Jasa Lo <i className="fa-solid fa-plus"></i>
+            Jual Jasa <i className="fa-solid fa-plus"></i>
           </Link>
         </motion.div>
-      </motion.div>
     </header>
   );
 };
