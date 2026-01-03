@@ -49,7 +49,7 @@ export default function GigDetailPage() {
     if (params.slug) fetchGigDetail();
   }, [params.slug, supabase]);
 
-  const handleChat = async () => {
+ const handleChat = async () => {
     setChatLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -80,21 +80,32 @@ export default function GigDetailPage() {
       router.push(`/inbox/${existingRoom.id}`);
     } else {
       // Bikin Room Baru
+      const initialMessage = `Halo, mau tanya soal jasa "${gig.title}"`;
+
       const { data: newRoom, error } = await supabase
         .from('conversations')
-        .insert({ user1_id: user1, user2_id: user2, last_message: `Halo, mau tanya soal jasa "${gig.title}"` })
+        .insert({ user1_id: user1, user2_id: user2, last_message: initialMessage })
         .select()
         .single();
 
       if (error) {
         showToast("Gagal bikin room chat.", "error");
       } else {
+        // FIX: Insert Pesan Pertama ke Tabel Messages juga!
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: newRoom.id,
+            sender_id: user.id, // Pengirimnya user yang lagi login (pembeli)
+            content: initialMessage
+          });
+
         router.push(`/inbox/${newRoom.id}`);
       }
     }
     setChatLoading(false);
   };
-
+  
   const handleShare = async () => {
     if (navigator.share) {
       try { await navigator.share({ title: gig.title, url: window.location.href }); } catch (e) {}
