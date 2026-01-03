@@ -19,19 +19,19 @@ const HowItWorksSection = () => {
           </Link>
         </div>
         
-        {/* HORIZONTAL SCROLL DI MOBILE */}
-        <div className="flex md:grid md:grid-cols-4 gap-3 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:mx-0 md:px-0 no-scrollbar">
+        {/* GRID 2x2 DI MOBILE (grid-cols-2) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {steps.map((step) => (
             <div 
               key={step.id}
-              className="min-w-[140px] md:min-w-0 snap-center bg-surface rounded-xl p-4 border-2 border-slate-900 shadow-hard-sm card-hoverable flex flex-col items-center text-center gap-3 group"
+              className="bg-surface rounded-xl p-3 border-2 border-slate-900 shadow-hard-sm card-hoverable flex flex-col items-center text-center gap-2 group"
             >
-              {/* Icon Only (No Box) */}
-              <i className={`fa-solid ${step.icon} text-3xl ${step.textIcon} group-hover:scale-110 transition-transform duration-200`}></i>
+              {/* Icon Kecil */}
+              <i className={`fa-solid ${step.icon} text-2xl md:text-3xl ${step.textIcon} group-hover:scale-110 transition-transform duration-200`}></i>
               
               <div>
-                <h3 className="text-sm font-black text-slate-900 leading-tight mb-1">{step.title}</h3>
-                <p className="text-[10px] text-slate-600 font-medium leading-snug">{step.desc}</p>
+                <h3 className="text-xs md:text-sm font-black text-slate-900 leading-tight mb-0.5">{step.title}</h3>
+                <p className="text-[9px] md:text-[10px] text-slate-600 font-medium leading-snug">{step.desc}</p>
               </div>
             </div>
           ))}

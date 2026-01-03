@@ -9,7 +9,7 @@ const Footer = () => {
         {/* Logo (Full Color dengan Background Putih biar kontras) */}
         <Link href="/" className="mb-4 opacity-90 hover:opacity-100 transition-opacity inline-block relative h-10 w-32 bg-white px-2 rounded-lg flex items-center justify-center">
             <Image 
-               src="/logodark.svg" 
+               src="/logo.svg" 
                alt="JASURD Logo" 
                fill
                className="object-contain p-1" // Hapus filter invert
