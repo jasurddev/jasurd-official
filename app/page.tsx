@@ -1,13 +1,13 @@
 import HeroSection from "@/components/home/HeroSection";
 import LiveTicker from "@/components/home/LiveTicker";
-import HowItWorksSection from "@/components/home/HowItWorks"; // Cek nama file di folder home, kalau HowItWorks.tsx pake ini
-import SpillTheGigSection from "@/components/home/SpillTheGigSection"; // <--- Ini nama yang benar
+import HowItWorksSection from "@/components/home/HowItWorks";
 import JastipSpotlight from "@/components/home/JastipSpotlight";
-import CuanFactSection from "@/components/home/CuanFact"; // Cek nama file, di list kamu CuanFact.tsx
+import InspirationWall from "@/components/home/InspirationWall"; // Import Baru
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-pattern overflow-hidden pb-20 md:pb-0">
+    <main className="min-h-screen bg-pattern overflow-x-hidden w-full pb-24 md:pb-0 flex flex-col">
+      
       {/* Hero Section */}
       <HeroSection />
 
@@ -17,17 +17,11 @@ export default function Home() {
       {/* How It Works */}
       <HowItWorksSection />
 
-      {/* 
-        Spill The Gig 
-        FIX: Ganti <SpillTheGig /> jadi <SpillTheGigSection /> 
-      */}
-      <SpillTheGigSection />
-
-      {/* Jastip Spotlight */}
+      {/* Jastip Spotlight (Tetap Ada) */}
       <JastipSpotlight />
 
-      {/* Cuan Fact */}
-      <CuanFactSection />
+      {/* Inspiration Wall (Gabungan Spill & Cuan Fact) */}
+      <InspirationWall />
       
     </main>
   );
